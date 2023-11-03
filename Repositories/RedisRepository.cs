@@ -9,8 +9,11 @@ namespace BankPassword.Repositories {
             _database = redisConnectionFactory.GetConnection().GetDatabase();
         }
 
-        public async Task Set(string key, string value) {
+        public async Task Set(string key, string value, TimeSpan expirationTime = default) {
             await _database.StringSetAsync(key, value);
+            if (expirationTime != default) {
+                await _database.KeyExpireAsync(key, expirationTime);
+            }
         }
 
         public async Task<string> Get(string key) {

@@ -16,14 +16,14 @@ namespace BankPassword.Services {
                 Keyboard = new Keyboard()
             };
 
-            await _redisRepository.Set(session.Id, JsonSerializer.Serialize(session.Keyboard));
+            await _redisRepository.Set(session.Id, JsonSerializer.Serialize(session.Keyboard), TimeSpan.FromMinutes(2));
             return session;
         }
 
         public async Task<Keyboard> GetKeyboardFromSession(string sessionId) {
             var keyboard = JsonSerializer.Deserialize<Keyboard>(await _redisRepository.Get(sessionId));
             if (keyboard is null) {
-                throw new ArgumentException("Invalid session id");
+                throw new ArgumentException("Invalid or expired session id");
             }
             return keyboard;
         }
