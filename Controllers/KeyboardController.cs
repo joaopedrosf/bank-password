@@ -1,4 +1,5 @@
 using BankPassword.Models;
+using BankPassword.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankPassword.Controllers {
@@ -6,11 +7,16 @@ namespace BankPassword.Controllers {
     [Route("[controller]")]
     public class KeyboardController : ControllerBase {
 
-        [HttpGet]
-        public IActionResult Get() {
-            var keyboard = new Keyboard();
-            keyboard.Generate();
-            return Ok(keyboard);
+        private readonly PasswordService _passwordService;
+
+        public KeyboardController(PasswordService passwordService) {
+            _passwordService = passwordService;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<PasswordSession>> Get() {
+            var session = await _passwordService.CreatePasswordSession();
+            return Ok(session);
         }
     }
 }

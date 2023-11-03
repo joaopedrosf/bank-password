@@ -1,6 +1,7 @@
 
 using BankPassword.Repositories;
 using BankPassword.Repositories.Connections;
+using BankPassword.Services;
 
 namespace BankPassword {
     public class Program {
@@ -15,6 +16,7 @@ namespace BankPassword {
             builder.Services.AddSwaggerGen();
             builder.Services.AddSingleton<IRedisConnectionFactory>(f => new RedisConnectionFactory(builder.Configuration));
             builder.Services.AddScoped<IRedisRepository, RedisRepository>();
+            builder.Services.AddScoped<PasswordService>();
 
             var app = builder.Build();
 

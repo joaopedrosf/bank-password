@@ -6,5 +6,10 @@ namespace BankPassword.Models {
         public byte FirstNumber { get; set; }
         [Range(0, 9)]
         public byte SecondNumber { get; set; }
+
+        public KeyboardButton(byte firstNumber, byte secondNumber) {
+            FirstNumber = firstNumber;
+            SecondNumber = secondNumber;
+        }
     }
 }
