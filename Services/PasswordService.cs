@@ -20,9 +20,49 @@ namespace BankPassword.Services {
             return session;
         }
 
-        public async Task<bool> CheckPassword(string password) {
-            var passwordFromRedis = await _redisRepository.Get("password");
-            return password == passwordFromRedis;
+        public async Task<Keyboard> GetKeyboardFromSession(string sessionId) {
+            var keyboard = JsonSerializer.Deserialize<Keyboard>(await _redisRepository.Get(sessionId));
+            if (keyboard is null) {
+                throw new ArgumentException("Invalid session id");
+            }
+            return keyboard;
+        }
+
+        public async Task<bool> CheckPassword(string sessionId, List<byte> buttonSequence) {
+            var examplePassword = BCrypt.Net.BCrypt.EnhancedHashPassword("654321");
+            var sessionKeyboard = await GetKeyboardFromSession(sessionId);
+            var passwordPossibilities = GeneratePasswordPossibilities(sessionKeyboard, buttonSequence);
+
+            foreach (var possibility in passwordPossibilities) {
+                if (BCrypt.Net.BCrypt.EnhancedVerify(possibility, examplePassword)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private List<string> GeneratePasswordPossibilities(Keyboard keyboard, List<byte> buttonSequence) {
+            var buttonsClicked = new List<KeyboardButton>();
+            foreach (var button in buttonSequence) {
+                buttonsClicked.Add(keyboard.Buttons[button]);
+            }
+            var passwordPossibilities = new List<string>();
+            GeneratePossibility(buttonsClicked, 0, string.Empty, passwordPossibilities);
+
+            return passwordPossibilities;
+        }
+
+        private void GeneratePossibility(List<KeyboardButton> buttonsClicked, int index, string currentCombination, List<string> passwordPossibilities) {
+            if (index == buttonsClicked.Count) {
+                passwordPossibilities.Add(currentCombination);
+                return;
+            }
+        
+            var button = buttonsClicked[index];
+
+            GeneratePossibility(buttonsClicked, index + 1, currentCombination + button.FirstNumber, passwordPossibilities);
+            GeneratePossibility(buttonsClicked, index + 1, currentCombination + button.SecondNumber, passwordPossibilities);
         }
     }
 }
