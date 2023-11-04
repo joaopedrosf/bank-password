@@ -3,7 +3,7 @@ using BankPassword.Repositories;
 using System.Text.Json;
 
 namespace BankPassword.Services {
-    public class PasswordService {
+    public class PasswordService : IPasswordService {
         private readonly IRedisRepository _redisRepository;
 
         public PasswordService(IRedisRepository redisRepository) {
@@ -29,40 +29,23 @@ namespace BankPassword.Services {
         }
 
         public async Task<bool> CheckPassword(string sessionId, List<byte> buttonSequence) {
-            var examplePassword = BCrypt.Net.BCrypt.EnhancedHashPassword("654321");
+            var examplePassword = BCrypt.Net.BCrypt.EnhancedHashPassword("87654321");
             var sessionKeyboard = await GetKeyboardFromSession(sessionId);
-            var passwordPossibilities = GeneratePasswordPossibilities(sessionKeyboard, buttonSequence);
+            var passwordPossibilities = KeyboardPossibilitiesCalculator.CalculatePasswordPossibilities(sessionKeyboard, buttonSequence);
+            var isPasswordCorrect = false;
+            
+            ParallelOptions options = new ParallelOptions {
+                MaxDegreeOfParallelism = 4
+            };
 
-            foreach (var possibility in passwordPossibilities) {
+            Parallel.ForEach(passwordPossibilities, options, (possibility, state) => {
                 if (BCrypt.Net.BCrypt.EnhancedVerify(possibility, examplePassword)) {
-                    return true;
+                    isPasswordCorrect = true;
+                    state.Stop();
                 }
-            }
+            });
 
-            return false;
-        }
-
-        private List<string> GeneratePasswordPossibilities(Keyboard keyboard, List<byte> buttonSequence) {
-            var buttonsClicked = new List<KeyboardButton>();
-            foreach (var button in buttonSequence) {
-                buttonsClicked.Add(keyboard.Buttons[button]);
-            }
-            var passwordPossibilities = new List<string>();
-            GeneratePossibility(buttonsClicked, 0, string.Empty, passwordPossibilities);
-
-            return passwordPossibilities;
-        }
-
-        private void GeneratePossibility(List<KeyboardButton> buttonsClicked, int index, string currentCombination, List<string> passwordPossibilities) {
-            if (index == buttonsClicked.Count) {
-                passwordPossibilities.Add(currentCombination);
-                return;
-            }
-        
-            var button = buttonsClicked[index];
-
-            GeneratePossibility(buttonsClicked, index + 1, currentCombination + button.FirstNumber, passwordPossibilities);
-            GeneratePossibility(buttonsClicked, index + 1, currentCombination + button.SecondNumber, passwordPossibilities);
+            return isPasswordCorrect;
         }
     }
 }

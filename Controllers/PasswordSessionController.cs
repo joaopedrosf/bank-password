@@ -5,22 +5,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace BankPassword.Controllers {
     [ApiController]
     [Route("[controller]")]
-    public class KeyboardController : ControllerBase {
+    public class PasswordSessionController : ControllerBase {
 
-        private readonly PasswordService _passwordService;
+        private readonly IPasswordService _passwordService;
 
-        public KeyboardController(PasswordService passwordService) {
+        public PasswordSessionController(IPasswordService passwordService) {
             _passwordService = passwordService;
         }
 
         [HttpPost]
-        public async Task<ActionResult<PasswordSession>> Get() {
+        public async Task<ActionResult<PasswordSession>> CreatePasswordSession() {
             var session = await _passwordService.CreatePasswordSession();
             return Ok(session);
         }
 
         [HttpGet("{sessionId}")]
-        public async Task<ActionResult<Keyboard>> Get(string sessionId) {
+        public async Task<ActionResult<Keyboard>> FindPasswordSessionKeyboard(string sessionId) {
             var keyboard = await _passwordService.GetKeyboardFromSession(sessionId);
             return Ok(keyboard);
         }
