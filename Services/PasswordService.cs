@@ -1,8 +1,10 @@
 ﻿using BankPassword.Models;
 using BankPassword.Repositories;
+using BankPassword.Utils;
 using System.Text.Json;
 
-namespace BankPassword.Services {
+namespace BankPassword.Services
+{
     public class PasswordService : IPasswordService {
         private readonly IRedisRepository _redisRepository;
 

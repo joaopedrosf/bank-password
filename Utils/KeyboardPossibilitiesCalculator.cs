@@ -1,10 +1,14 @@
 ﻿using BankPassword.Models;
 
-namespace BankPassword.Services {
-    public static class KeyboardPossibilitiesCalculator {
-        public static List<string> CalculatePasswordPossibilities(Keyboard keyboard, List<byte> buttonSequence) {
+namespace BankPassword.Utils
+{
+    public static class KeyboardPossibilitiesCalculator
+    {
+        public static List<string> CalculatePasswordPossibilities(Keyboard keyboard, List<byte> buttonSequence)
+        {
             var buttonsClicked = new List<KeyboardButton>();
-            foreach (var button in buttonSequence) {
+            foreach (var button in buttonSequence)
+            {
                 buttonsClicked.Add(keyboard.Buttons[button]);
             }
             var passwordPossibilities = new List<string>();
@@ -13,8 +17,10 @@ namespace BankPassword.Services {
             return passwordPossibilities;
         }
 
-        private static void CalculatePossibility(List<KeyboardButton> buttonsClicked, int index, string currentCombination, List<string> passwordPossibilities) {
-            if (index == buttonsClicked.Count) {
+        private static void CalculatePossibility(List<KeyboardButton> buttonsClicked, int index, string currentCombination, List<string> passwordPossibilities)
+        {
+            if (index == buttonsClicked.Count)
+            {
                 passwordPossibilities.Add(currentCombination);
                 return;
             }
